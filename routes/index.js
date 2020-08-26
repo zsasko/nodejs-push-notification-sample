@@ -22,26 +22,22 @@ module.exports = {
         return res.status(422).send({ success: false, errors: errors.array() });
       }
       //
-      let uuid = req.body.uuid;
       let message = req.body.message;
-      let platform = req.body.platform;
 
       const androidDeviceTokens = await PushDevice.findAll({
         attributes: ["token"],
         where: {
           platform: "android",
         },
-      }); //.map(u => u.get("token")); // [1,2,3]
+      });
       const tokensArray = androidDeviceTokens.map((u) => u.get("token"));
-
-      console.log("android devices: " + JSON.stringify(tokensArray));
 
       // Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
       var sender = new gcm.Sender(process.env.FCM_SERVER_KEY);
 
       // Prepare a message to be sent
       var gcmMessage = new gcm.Message();
-      gcmMessage.addNotification("title", "Alert!!!");
+      gcmMessage.addNotification("title", "You have received push notification!");
       gcmMessage.addNotification("body", message);
 
       // Actually send the message
@@ -52,8 +48,6 @@ module.exports = {
         if (err) console.error(err);
         else console.log(response);
       });
-
-      androidDeviceTokens;
 
       return res.status(201).send({ success: true });
     },
